@@ -1,0 +1,165 @@
+#input api
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: input.jarvis.io
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: input.jarvis.io
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: inputapi
+          servicePort: 80
+
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: inputapi
+spec:
+  type: LoadBalancer
+  selector:
+    app: inputapi
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5000
+
+
+---
+
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: inputapi
+  labels:
+    app: inputapi
+    tier: input
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: inputapi
+  template:
+    metadata:
+      labels:
+        app: inputapi
+        tier: input
+    spec:
+      containers:
+      - name: inputapi
+        image: jarvisio/input:1.0.0.3
+        env:
+          - name: 'Swagger__EnableSwagger'
+            value: 'true'
+          - name: 'Swagger__SwaggerDocsFileName'
+            value: 'docs.xml'
+          - name: 'Swagger__ApiName'
+            value: 'Jarvis Api'
+          - name: 'Swagger__ApiDescription'
+            value: 'Sends commands to Jarvis'
+          - name: 'ASPNETCORE_ENVIRONMENT'
+            value: 'Development'
+        ports:
+          - containerPort: 5000
+#       - name: logstashlogger
+#         image:  docker.elastic.co/logstash/logstash:6.5.0
+#         volumeMounts:
+#           - name: logstash-config-volume
+#             mountPath: /usr/share/logstash/pipeline/
+#       volumes:
+#       - name: logstash-config-volume
+#         configMap:
+#           name: logstash-from-console-config
+
+# #Logging          
+# ---
+
+# apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: logstash-from-console-config
+#   namespace: default
+# data:
+#   'node.name': 'logstashcollector'
+#   'pipeline.workers': '1'
+#   'config.string': "input { 
+#   stdin  {
+#     path => \"/var/log/messages\"
+#     type => \"syslog\"
+#   }
+# }
+# output {
+#   elasticsearch { hosts => [\"elasticlogs:9200\"] }
+# }
+# "
+
+# ---
+# apiVersion: apps/v1
+# kind: ReplicaSet
+# metadata:
+#   name: elasticlogs
+#   labels:
+#     app: elasticlogs
+#     tier: logging
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: elasticlogs
+#   template:
+#     metadata:
+#       labels:
+#         app: elasticlogs
+#         tier: logging
+#     spec:
+#       containers:
+#       - name: elasticlogs
+#         image: docker.elastic.co/elasticsearch/elasticsearch:6.5.0
+#         env:
+#           - name: 'discovery.type'
+#             value: 'single-node'
+#         ports:
+#           - containerPort: 9200
+# ---
+
+# kind: Service
+# apiVersion: v1
+# metadata:
+#   name: elasticlogs
+# spec:
+#   type: LoadBalancer
+#   selector:
+#     app: elasticlogs
+#   ports:
+#   - protocol: TCP
+#     port: 9200
+#     targetPort: 9200
+
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: logging.jarvis.io
+  namespace: kube-system 
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: logging.jarvis.io
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: kibana-logging
+          servicePort: 30003
+

@@ -1,0 +1,16 @@
+version: '3.4'
+
+services:
+  jarvis.api.service:
+    image: jarvisio/input:1.0.0.3
+    ports: 
+      - 5000:5000
+    environment: 
+      - 'Swagger:EnableSwagger=true'
+      - 'Swagger:SwaggerDocsFileName=docs.xml'
+      - 'Swagger:ApiName=Stock Api'
+      - 'Swagger:ApiDescription=Manages Stock'
+      - 'ASPNETCORE_ENVIRONMENT=Development'
+    build:
+      context: ../../Src
+      dockerfile: .Dockerfile
