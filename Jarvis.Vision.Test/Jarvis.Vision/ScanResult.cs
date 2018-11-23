@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
+using System.Runtime.InteropServices;
 
 namespace Jarvis.Vision
 {
@@ -15,7 +16,7 @@ namespace Jarvis.Vision
 
         public Layer AddLayer(byte tolerance)
         {
-            var layer = new Layer(tolerance);
+            var layer = new Layer(tolerance,OriginalImage.Size);
             Layers.Add(layer);
             return layer;
         }

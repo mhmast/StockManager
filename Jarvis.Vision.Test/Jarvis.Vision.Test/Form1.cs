@@ -25,7 +25,7 @@ namespace Jarvis.Vision.Test
             {
                 imageBox.Image = Image.FromFile(openFileDialog1.FileName);
                 imageBox.Size = imageBox.Image.Size;
-                _result = new Scan2(imageBox.Image).GetResult();
+                _result = new Scan(imageBox.Image).GetResult();
                 propertyGrid.SelectedObject = _result;
             }
         }
