@@ -8,10 +8,12 @@ namespace Jarvis.Vision
     {
         public List<Layer> Layers { get; } = new List<Layer>();
         public Image OriginalImage { get; }
+        public Bitmap FilteredImage { get; }
 
-        public ScanResult(Image originalImage)
+        public ScanResult(Image originalImage, Bitmap filteredImage)
         {
             OriginalImage = originalImage;
+            FilteredImage = filteredImage;
         }
 
         public Layer AddLayer(byte tolerance)

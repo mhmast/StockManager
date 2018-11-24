@@ -42,9 +42,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ColorExtensions.cs" />
     <Compile Include="Layer.cs" />
+    <Compile Include="Matrix.cs" />
     <Compile Include="NumberExtensions.cs" />
     <Compile Include="PixelBucket.cs" />
+    <Compile Include="PixelData.cs" />
     <Compile Include="ScanResult.cs" />
     <Compile Include="Scan.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

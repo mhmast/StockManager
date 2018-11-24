@@ -46,5 +46,10 @@ namespace Jarvis.Vision
         {
             return GetEnumerator();
         }
+
+        public void RemoveBucket(PixelBucket bucket)
+        {
+            Buckets.Remove(bucket);
+        }
     }
 }

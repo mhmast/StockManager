@@ -12,5 +12,8 @@ namespace Jarvis.Vision
         {
             return min <= i && i <= max;
         }
+
+        public static int Max(this int i, int max)
+            => Math.Min(i, max);
     }
 }

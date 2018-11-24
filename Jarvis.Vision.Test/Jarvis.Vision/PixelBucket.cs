@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Threading;
 
 namespace Jarvis.Vision
 {
@@ -14,7 +15,10 @@ namespace Jarvis.Vision
             _l = l;
             BaseColor = baseColor;
             BasePoint = basePoint;
+            Count = 0;
         }
+
+        public int Count { get; private set; }
 
         public Color BaseColor { get; }
         public Point BasePoint { get; }
@@ -22,6 +26,7 @@ namespace Jarvis.Vision
         public void Add(Point p)
         {
             _l[p.Y][p.X] = this;
+            Count++;
         }
 
         public IEnumerator<Point> GetEnumerator()
