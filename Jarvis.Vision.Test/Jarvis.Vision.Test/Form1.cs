@@ -41,7 +41,7 @@ namespace Jarvis.Vision.Test
             treeView1.Nodes.Add(treeNode);
             foreach (var scanResultLayer in scanResult.Layers)
             {
-                var node = treeNode.Nodes.Add($"Layer (tolerance {scanResultLayer.Tolerance}");
+                var node = treeNode.Nodes.Add($"Layer ({scanResultLayer.Name})");
                 node.Tag = scanResultLayer;
             }
         }
@@ -79,16 +79,13 @@ namespace Jarvis.Vision.Test
 
             if (treeNode.Tag is PixelBucket bucket)
             {
-                if (treeNode.TreeView.Tag is ScanResult scanResult)
-                {
-                    DrawBucketOn(bucket, scanResult.FilteredImage);
-                }
+                DrawBucket(bucket);
             }
         }
 
-        private void DrawBucketOn(PixelBucket bucket, Image originalImage)
+        private void DrawBucket(PixelBucket bucket)
         {
-            var bmp = new Bitmap(originalImage);
+            var bmp = new Bitmap(bucket.Layer.TransformedImage);
             var bmpData = bmp.LockBits(new Rectangle(new Point(), bmp.Size), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
             var data = new PixelData(bmpData);
             foreach (var pixel in bucket)

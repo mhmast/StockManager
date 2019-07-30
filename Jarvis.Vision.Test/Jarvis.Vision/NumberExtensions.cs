@@ -15,5 +15,10 @@ namespace Jarvis.Vision
 
         public static int Max(this int i, int max)
             => Math.Min(i, max);
+
+        public static float CosDeg(this float f)
+            => (float) Math.Cos(f * 0.0174532925);
+
+        public static float Positive(this float num) => num < 0 ? num * -1 : num;
     }
 }

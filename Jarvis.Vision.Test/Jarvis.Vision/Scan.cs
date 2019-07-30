@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Jarvis.Vision
 {
@@ -12,30 +13,23 @@ namespace Jarvis.Vision
         public Scan(Image image)
         {
             OriginalImage = image;
-            FilteredImage = new Bitmap(image).ConvolutionFilter(Matrix.Gaussian3x3, Matrix.Gaussian3x3, 1, 0, true);
-            //FilteredImage = new Bitmap(image).ConvolutionFilter(Matrix.Prewitt3x3Horizontal,Matrix.Prewitt3x3Vertical,2);
         }
-
-        public Bitmap FilteredImage { get; }
 
         private Image OriginalImage { get; }
 
         public ScanResult GetResult()
         {
-            var result = new ScanResult(OriginalImage, FilteredImage);
-            for (byte i = 0; i <= 1; i++)
-            {
-                var layer = result.AddLayer(i);
-                ScanImage(layer, FilteredImage);
-            }
+            var result = new ScanResult(OriginalImage);
+            Parallel.ForEach(result.Layers, ScanImage);
             return result;
         }
 
-        private void ScanImage(Layer layer, Image originalImage)
+        private void ScanImage(Layer layer)
         {
-            var bmp = new Bitmap(originalImage);
+            var bmp = new Bitmap(layer.TransformedImage);
             var data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             var pixelData = new PixelData(data);
+            var dataSurfacePerc = data.Width * data.Height / 20000;
             for (var y = 0; y < data.Height; y++)
             {
                 for (var x = 0; x < data.Width; x++)
@@ -44,10 +38,10 @@ namespace Jarvis.Vision
                     if (!layer.Contains(point))
                     {
                         var bucket = layer.AddBucket(pixelData.GetPixel(point), point);
-                        FloodFill(pixelData, new Point(x, y), bucket,
-                            c => IsColor(c, bucket.BaseColor), layer);
-                        if (bucket.Count == 0)
+                        FloodFill(pixelData, new Point(x, y), bucket, layer);
+                        if (bucket.Count < dataSurfacePerc)//remove less than .05 perc of the image
                         {
+
                             layer.RemoveBucket(bucket);
                         }
                     }
@@ -65,18 +59,21 @@ namespace Jarvis.Vision
             && c.B.InRange(baseColor.B - tolerance, baseColor.B + tolerance);
         }
 
-        private bool IsColor(Color c, Color baseColor)
-        {
-            return baseColor.A != 0 &&c.A != 0 && c.R + c.G + c.B != 765;
-        }
+        //private bool IsColor(Color c, Color baseColor)
+        //{
+        //    return baseColor.A != 0 &&;
+        //}
 
-        private void FloodFill(PixelData pixelData, Point point, PixelBucket bucket, Func<Color, bool> isInBucket, Layer layer)
+        private void FloodFill(PixelData pixelData, Point point, PixelBucket bucket, Layer layer)
         {
-            var pixelsToScan = new Queue<Point>();
-            pixelsToScan.Enqueue(point);
+            var pixelsToScan = new Queue<Tuple<Color, Point>>();
+            pixelsToScan.Enqueue(new Tuple<Color, Point>(bucket.BaseColor, point));
+
             while (pixelsToScan.Count > 0)
             {
-                point = pixelsToScan.Dequeue();
+                var pointColor = pixelsToScan.Dequeue();
+                var prevColor = pointColor.Item1;
+                point = pointColor.Item2;
 
                 if (point.X < 0 || point.X > pixelData.Width - 1)
                 {
@@ -93,17 +90,19 @@ namespace Jarvis.Vision
                     continue;
                 }
 
-                if (isInBucket(pixelData.GetPixel(point)))
+                var color = pixelData.GetPixel(point);
+                if (bucket.Contains(color, prevColor))
                 {
+
                     bucket.Add(point);
-                    pixelsToScan.Enqueue(new Point(point.X - 1, point.Y));
-                    pixelsToScan.Enqueue(new Point(point.X + 1, point.Y));
-                    pixelsToScan.Enqueue(new Point(point.X, point.Y - 1));
-                    pixelsToScan.Enqueue(new Point(point.X, point.Y + 1));
-                    pixelsToScan.Enqueue(new Point(point.X - 1, point.Y - 1));
-                    pixelsToScan.Enqueue(new Point(point.X + 1, point.Y + 1));
-                    pixelsToScan.Enqueue(new Point(point.X + 1, point.Y - 1));
-                    pixelsToScan.Enqueue(new Point(point.X - 1, point.Y + 1));
+                    pixelsToScan.Enqueue(new Tuple<Color, Point>(color, new Point(point.X - 1, point.Y)));
+                    pixelsToScan.Enqueue(new Tuple<Color, Point>(color, new Point(point.X + 1, point.Y)));
+                    pixelsToScan.Enqueue(new Tuple<Color, Point>(color, new Point(point.X, point.Y - 1)));
+                    pixelsToScan.Enqueue(new Tuple<Color, Point>(color, new Point(point.X, point.Y + 1)));
+                    pixelsToScan.Enqueue(new Tuple<Color, Point>(color, new Point(point.X - 1, point.Y - 1)));
+                    pixelsToScan.Enqueue(new Tuple<Color, Point>(color, new Point(point.X + 1, point.Y + 1)));
+                    pixelsToScan.Enqueue(new Tuple<Color, Point>(color, new Point(point.X + 1, point.Y - 1)));
+                    pixelsToScan.Enqueue(new Tuple<Color, Point>(color, new Point(point.X - 1, point.Y + 1)));
                 }
             }
         }

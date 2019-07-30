@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2018
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jarvis.Vision.Test", "Jarvis.Vision.Test\Jarvis.Vision.Test.csproj", "{758A69FE-6323-4AE7-B77B-8409863EBAE0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jarvis.Vision", "Jarvis.Vision\Jarvis.Vision.csproj", "{46497614-E086-45EC-94E6-C32873838DE0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jarvis.Visualizer", "Jarvis.Visualizer\Jarvis.Visualizer.csproj", "{E2CA5ECF-E5D0-4151-A938-5E2F07156B99}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,8 +23,15 @@ Global
 		{46497614-E086-45EC-94E6-C32873838DE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{46497614-E086-45EC-94E6-C32873838DE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{46497614-E086-45EC-94E6-C32873838DE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2CA5ECF-E5D0-4151-A938-5E2F07156B99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2CA5ECF-E5D0-4151-A938-5E2F07156B99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2CA5ECF-E5D0-4151-A938-5E2F07156B99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2CA5ECF-E5D0-4151-A938-5E2F07156B99}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {15A4E6CB-5D37-4E54-9647-DCAD8EA31969}
 	EndGlobalSection
 EndGlobal

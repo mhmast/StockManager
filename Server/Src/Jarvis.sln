@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2018
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.352
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jarvis.Api.Service", "Api\Jarvis.Api.Service\Jarvis.Api.Service.csproj", "{729BBEDF-2AAD-462B-BC05-2B6A40896D98}"
 EndProject
@@ -18,6 +18,18 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jarvis.Infrastructure.Logging.Nlog", "Infrastructure\Jarvis.Infrastructure.Logging.Nlog\Jarvis.Infrastructure.Logging.Nlog.csproj", "{886F4548-25CB-4A15-99CB-B55492718769}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jarvis.Infrastructure.WebApi", "Infrastructure\Jarvis.Infrastructure.WebApi\Jarvis.Infrastructure.WebApi.csproj", "{BCAEE170-4DD8-482C-BCAC-2CDBB9056EDA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{B91F8AEA-F80B-4FB6-907A-C4CA7392278A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jarvis.Tools.Vision", "Jarvis.Tools.Vision\Jarvis.Tools.Vision.csproj", "{E17A044A-2407-4090-8342-B4B5864082E7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Lib", "Lib", "{93472F82-C238-4AA9-9F98-49EFD9DA09B5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jarvis.Library.Math", "Jarvis.Library.Math\Jarvis.Library.Math.csproj", "{30BB095E-2FA0-45E4-A274-C690DFB76258}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jarvis.Library.Imaging", "Jarvis.Library.Imaging\Jarvis.Library.Imaging.csproj", "{C4A1A0E6-F3F0-43AB-9F2A-AB5D0F763E2A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OpenCV", "OpenCV", "{FDA20F35-C370-4E70-99F6-0CB8F0359B03}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +57,18 @@ Global
 		{BCAEE170-4DD8-482C-BCAC-2CDBB9056EDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BCAEE170-4DD8-482C-BCAC-2CDBB9056EDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BCAEE170-4DD8-482C-BCAC-2CDBB9056EDA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E17A044A-2407-4090-8342-B4B5864082E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E17A044A-2407-4090-8342-B4B5864082E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E17A044A-2407-4090-8342-B4B5864082E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E17A044A-2407-4090-8342-B4B5864082E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30BB095E-2FA0-45E4-A274-C690DFB76258}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30BB095E-2FA0-45E4-A274-C690DFB76258}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30BB095E-2FA0-45E4-A274-C690DFB76258}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30BB095E-2FA0-45E4-A274-C690DFB76258}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4A1A0E6-F3F0-43AB-9F2A-AB5D0F763E2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4A1A0E6-F3F0-43AB-9F2A-AB5D0F763E2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4A1A0E6-F3F0-43AB-9F2A-AB5D0F763E2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4A1A0E6-F3F0-43AB-9F2A-AB5D0F763E2A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -56,6 +80,10 @@ Global
 		{FBF78CBC-3F5C-4015-BBAD-5DD1C95A5050} = {BDFD7B22-1C9D-4FBA-8B5F-6C6346576241}
 		{886F4548-25CB-4A15-99CB-B55492718769} = {BDFD7B22-1C9D-4FBA-8B5F-6C6346576241}
 		{BCAEE170-4DD8-482C-BCAC-2CDBB9056EDA} = {BDFD7B22-1C9D-4FBA-8B5F-6C6346576241}
+		{E17A044A-2407-4090-8342-B4B5864082E7} = {B91F8AEA-F80B-4FB6-907A-C4CA7392278A}
+		{30BB095E-2FA0-45E4-A274-C690DFB76258} = {93472F82-C238-4AA9-9F98-49EFD9DA09B5}
+		{C4A1A0E6-F3F0-43AB-9F2A-AB5D0F763E2A} = {93472F82-C238-4AA9-9F98-49EFD9DA09B5}
+		{FDA20F35-C370-4E70-99F6-0CB8F0359B03} = {93472F82-C238-4AA9-9F98-49EFD9DA09B5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1DD8ADA9-0EB9-41E6-82DD-7AA7C64FA293}
