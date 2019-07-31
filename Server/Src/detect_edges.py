@@ -2,6 +2,8 @@
 import argparse
 import cv2
 import os
+import time
+import sys
 import numpy as np
 
 
@@ -10,7 +12,7 @@ import numpy as np
 ap = argparse.ArgumentParser()
 ap.add_argument("-d", "--edge-detector", type=str, required=True,
                 help="path to OpenCV's deep learning edge detector")
-ap.add_argument("-i", "--image", type=str, required=True,
+ap.add_argument("-i", "--image", type=str, required=False,
                 help="path to input image")
 args = vars(ap.parse_args())
 
@@ -58,84 +60,98 @@ net = cv2.dnn.readNetFromCaffe(protoPath, modelPath)
 # register our new layer with the model
 cv2.dnn_registerLayer("Crop", CropLayer)
 
-image = cv2.imread(args["image"])
-(H, W) = image.shape[:2]
+if(args["image"] is not None):
+    image = cv2.imread(args["image"])
+else:
+    cam = cv2.VideoCapture(0)
+    time.sleep(1.000) 
+    ret, image = cam.read()
+    if(not ret):
+        print("camera capture failed")
+        sys.exit()
+
+H, W = image.shape[:2]
 
 # convert the image to grayscale, blur it, and perform Canny
 # edge detection
-print("[INFO] performing Canny edge detection...")
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-canny = cv2.Canny(blurred, 30, 150)
+# print("[INFO] performing Canny edge detection...")
+# gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+# blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+# canny = cv2.Canny(blurred, 30, 150)
 
-# construct a blob out of the input image for the Holistically-Nested
-# Edge Detector
+# # construct a blob out of the input image for the Holistically-Nested
+# # Edge Detector
 blob = cv2.dnn.blobFromImage(image, scalefactor=1.0, size=(W, H),
                             mean=(104.00698794, 116.66876762, 122.67891434),
                             swapRB=False, crop=False)
 
-# set the blob as the input to the network and perform a forward pass
-# to compute the edges
+# # set the blob as the input to the network and perform a forward pass
+# # to compute the edges
 print("[INFO] performing holistically-nested edge detection...")
 net.setInput(blob)
 hed = net.forward()
 hed = cv2.resize(hed[0, 0], (W, H))
 hed = (255 * hed).astype("uint8")
+ret,hed = cv2.threshold(hed,127,255,cv2.THRESH_TRUNC)
 
-contourshed, hierarchyhed = cv2.findContours(hed,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-contourhed = np.zeros((H, W,3), dtype = "uint8")
-cv2.drawContours(contourhed, contourshed, -1, (0,255,0), 1)
+# contourshed, hierarchyhed = cv2.findContours(hed,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+# contourhed = np.zeros((H, W,3), dtype = "uint8")
+# cv2.drawContours(contourhed, contourshed, -1, (0,255,0), 1)
 
-# construct a blob out of the input image for the Holistically-Nested
-# Edge Detector
-cannycolor =  cv2.cvtColor(canny, cv2.COLOR_GRAY2BGR)
-blob = cv2.dnn.blobFromImage(cannycolor, scalefactor=1.0, size=(W, H),
-                            mean=(104.00698794, 116.66876762, 122.67891434),
-                            swapRB=False, crop=False)
+# cannycolor =  cv2.cvtColor(canny, cv2.COLOR_GRAY2BGR)
+# blob = cv2.dnn.blobFromImage(cannycolor, scalefactor=1.0, size=(W, H),
+#                             mean=(104.00698794, 116.66876762, 122.67891434),
+#                             swapRB=False, crop=False)
  
-print("[INFO] performing holistically-nested edge detection...")
-net.setInput(blob)
-hedcanny = net.forward()
-hedcanny = cv2.resize(hedcanny[0, 0], (W, H))
-hedcanny = (255 * hedcanny).astype("uint8")
+# print("[INFO] performing holistically-nested edge detection...")
+# net.setInput(blob)
+# hedcanny = net.forward()
+# hedcanny = cv2.resize(hedcanny[0, 0], (W, H))
+# hedcanny = (255 * hedcanny).astype("uint8")
 
 
-contourshedoncanny, hierarchyhedoncanny = cv2.findContours(hedcanny,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-imgcontourhedoncanny = np.zeros((H, W,3), dtype = "uint8")
-cv2.drawContours(imgcontourhedoncanny, contourshedoncanny, -1, (0,255,0), 1)
-# v = numpy.median(hed)
-# sigma = 0.33
-# lower = int(max(0, (1.0 - sigma) * v))
-# upper = int(min(255, (1.0 + sigma) * v))
+# contourshedoncanny, hierarchyhedoncanny = cv2.findContours(hedcanny,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+# imgcontourhedoncanny = np.zeros((H, W,3), dtype = "uint8")
+# cv2.drawContours(imgcontourhedoncanny, contourshedoncanny, -1, (0,255,0), 1)
 
-cannyhed = cv2.Canny(hed,125,255)
+cannyhed = cv2.Canny(hed,125,255,12)
 contourscannyonhed, hierarchycannyonhed = cv2.findContours(cannyhed,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 imgcontourcannyonhed = np.zeros((H, W,3), dtype = "uint8")
-cv2.drawContours(imgcontourcannyonhed, contourscannyonhed, -1, (0,255,0), 15)
+cv2.drawContours(imgcontourcannyonhed, contourscannyonhed, -1, (255,255,255), 2)
 
+# cannyoncontours = cv2.Canny(imgcontourcannyonhed,125,255)
+# contourscannyoncontours, hierarchycannyoncontours = cv2.findContours(cannyoncontours,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+# imgcontourcannyoncontours = np.zeros((H, W,3), dtype = "uint8")
+# cv2.drawContours(imgcontourcannyoncontours, contourscannyoncontours, -1, (255,255,255), 1)
 
 # show the output edge detection result for Canny and
 # Holistically-Nested Edge Detection
 cv2.imshow("Input", image)
-cv2.imshow("Canny", canny)
+# cv2.imshow("Canny", canny)
 cv2.imshow("HED", hed)
-cv2.imshow("HED on Canny", hedcanny)
+# cv2.imshow("HED on Canny", hedcanny)
 cv2.imshow("canny on HED", cannyhed)
-cv2.imshow("Contours HED", contourhed)
-cv2.imshow("Contours HED on Canny", imgcontourhedoncanny)
+#cv2.imshow("Contours HED", contourhed)
+# cv2.imshow("Contours HED on Canny", imgcontourhedoncanny)
 cv2.imshow("Contours Canny on HED", imgcontourcannyonhed)
-cv2.imwrite('out.jpg',hedcanny)
+# cv2.imshow("Contours Canny on Contours", imgcontourcannyoncontours)
+# cv2.imwrite('out.jpg',imgcontourcannyonhed)
 contour = 0
 while True:
     key = cv2.waitKey(0)
     if key==27:    # Esc key to stop
         break
-    cv2.drawContours(contourhed, contourshed, contour, (255,0,0), 1)
-    cv2.imshow("Contours HED", contourhed)
-    cv2.drawContours(imgcontourhedoncanny, contourshedoncanny,contour, (255,0,0), 1)
-    cv2.imshow("Contours HED on Canny", imgcontourhedoncanny)
+    # cv2.drawContours(contourhed, contourshed, contour, (255,0,0), 1)
+    # cv2.imshow("Contours HED", contourhed)
+    # cv2.drawContours(imgcontourhedoncanny, contourshedoncanny,contour, (255,0,0), 1)
+    # cv2.imshow("Contours HED on Canny", imgcontourhedoncanny)
+    # cv2.drawContours(imgcontourcannyonhed, contourscannyonhed, contour, (255,0,0), 1)
+    # cv2.imshow("Contours Canny on HED", imgcontourcannyonhed)
+    # cv2.imshow("Contours Canny on Contours", imgcontourcannyoncontours)
     cv2.drawContours(imgcontourcannyonhed, contourscannyonhed, contour, (255,0,0), 1)
     cv2.imshow("Contours Canny on HED", imgcontourcannyonhed)
     contour = contour +1
 
 
+cam.release()
+cv2.destroyAllWindows()
