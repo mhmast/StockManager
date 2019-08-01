@@ -59,7 +59,7 @@ net = cv2.dnn.readNetFromCaffe(protoPath, modelPath)
 
 # register our new layer with the model
 cv2.dnn_registerLayer("Crop", CropLayer)
-
+cam = None
 if(args["image"] is not None):
     image = cv2.imread(args["image"])
 else:
@@ -91,8 +91,13 @@ print("[INFO] performing holistically-nested edge detection...")
 net.setInput(blob)
 hed = net.forward()
 hed = cv2.resize(hed[0, 0], (W, H))
-hed = (255 * hed).astype("uint8")
-ret,hed = cv2.threshold(hed,127,255,cv2.THRESH_TRUNC)
+hedbw = (255 * hed).astype("uint8")
+hed = cv2.bitwise_not(hedbw)
+#ret,hed = cv2.threshold(hed,100,255,cv2.THRESH_TRUNC)
+
+
+#threshed = cv2.morphologyEx(hedbw, cv2.MORPH_CLOSE, rect_kernel)
+#dilated = cv2.dilate(hedbw,rect_kernel,iterations = 1)
 
 # contourshed, hierarchyhed = cv2.findContours(hed,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 # contourhed = np.zeros((H, W,3), dtype = "uint8")
@@ -113,11 +118,16 @@ ret,hed = cv2.threshold(hed,127,255,cv2.THRESH_TRUNC)
 # contourshedoncanny, hierarchyhedoncanny = cv2.findContours(hedcanny,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 # imgcontourhedoncanny = np.zeros((H, W,3), dtype = "uint8")
 # cv2.drawContours(imgcontourhedoncanny, contourshedoncanny, -1, (0,255,0), 1)
-
-cannyhed = cv2.Canny(hed,125,255,12)
+rect_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
+cannyhed = cv2.Canny(hed,0,255)
+cannyhed = cv2.dilate(cannyhed,rect_kernel,iterations = 1)
 contourscannyonhed, hierarchycannyonhed = cv2.findContours(cannyhed,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 imgcontourcannyonhed = np.zeros((H, W,3), dtype = "uint8")
 cv2.drawContours(imgcontourcannyonhed, contourscannyonhed, -1, (255,255,255), 2)
+
+# contourstreshed, hierarchytreshed = cv2.findContours(threshed,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+# imgcontourtreshed = np.zeros((H, W,3), dtype = "uint8")
+# cv2.drawContours(imgcontourtreshed, contourstreshed, -1, (255,255,255), 2)
 
 # cannyoncontours = cv2.Canny(imgcontourcannyonhed,125,255)
 # contourscannyoncontours, hierarchycannyoncontours = cv2.findContours(cannyoncontours,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
@@ -129,11 +139,14 @@ cv2.drawContours(imgcontourcannyonhed, contourscannyonhed, -1, (255,255,255), 2)
 cv2.imshow("Input", image)
 # cv2.imshow("Canny", canny)
 cv2.imshow("HED", hed)
+# cv2.imshow("Dilated", dilated)
 # cv2.imshow("HED on Canny", hedcanny)
 cv2.imshow("canny on HED", cannyhed)
 #cv2.imshow("Contours HED", contourhed)
 # cv2.imshow("Contours HED on Canny", imgcontourhedoncanny)
 cv2.imshow("Contours Canny on HED", imgcontourcannyonhed)
+#cv2.imshow("TresHED", threshed)
+#cv2.imshow("Contours TresHED", imgcontourtreshed)
 # cv2.imshow("Contours Canny on Contours", imgcontourcannyoncontours)
 # cv2.imwrite('out.jpg',imgcontourcannyonhed)
 contour = 0
@@ -148,10 +161,10 @@ while True:
     # cv2.drawContours(imgcontourcannyonhed, contourscannyonhed, contour, (255,0,0), 1)
     # cv2.imshow("Contours Canny on HED", imgcontourcannyonhed)
     # cv2.imshow("Contours Canny on Contours", imgcontourcannyoncontours)
-    cv2.drawContours(imgcontourcannyonhed, contourscannyonhed, contour, (255,0,0), 1)
+    cv2.drawContours(imgcontourcannyonhed, contourscannyonhed, contour, (255,0,0), -1)
     cv2.imshow("Contours Canny on HED", imgcontourcannyonhed)
     contour = contour +1
 
-
-cam.release()
+if(cam is not None):
+    cam.release()
 cv2.destroyAllWindows()
