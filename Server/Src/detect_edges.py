@@ -48,7 +48,9 @@ class CropLayer(object):
         return [inputs[0][:, :, self.startY:self.endY,
                                 self.startX:self.endX]]
 
-
+def combine(img1,img2):
+    return cv2.addWeighted(img1,0.5,img2,0.5,0)
+    
 # load our serialized edge detector from disk
 print("[INFO] loading edge detector...")
 protoPath = os.path.sep.join([args["edge_detector"],
@@ -91,20 +93,26 @@ blob = cv2.dnn.blobFromImage(cv2.cvtColor(gray,cv2.COLOR_GRAY2RGB), scalefactor=
 # # set the blob as the input to the network and perform a forward pass
 # # to compute the edges
 print("[INFO] performing holistically-nested edge detection...")
+net.setPreferableTarget(cv2.dnn.DNN_TARGET_GPU)
 net.setInput(blob)
 hed = net.forward()
 hed = cv2.resize(hed[0, 0], (W, H))
 hedbw = (255 * hed).astype("uint8")
-hed = cv2.bitwise_not(hedbw)
-#ret,hed = cv2.threshold(hed,100,255,cv2.THRESH_TRUNC)
+hed = hedbw
+cv2.imshow('HEDBW',hedbw)
+ret,hedlow = cv2.threshold(hed,0,100,cv2.THRESH_TRUNC)
+cv2.imshow('HEDLOW',hedlow)
+ret,hedhigh = cv2.threshold(hed,200,255,cv2.THRESH_TRUNC)
+hed = combine(hedlow,hedhigh)
+cv2.imshow('HEDHIGH',hedhigh)
 
 
 #threshed = cv2.morphologyEx(hedbw, cv2.MORPH_CLOSE, rect_kernel)
 #dilated = cv2.dilate(hedbw,rect_kernel,iterations = 1)
 
-# contourshed, hierarchyhed = cv2.findContours(hed,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-# contourhed = np.zeros((H, W,3), dtype = "uint8")
-# cv2.drawContours(contourhed, contourshed, -1, (0,255,0), 1)
+contourshed, hierarchyhed = cv2.findContours(hed,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+contourhed = np.zeros((H, W,3), dtype = "uint8")
+cv2.drawContours(contourhed, contourshed, -1, (255,255,255), 2)
 
 # cannycolor =  cv2.cvtColor(canny, cv2.COLOR_GRAY2BGR)
 # blob = cv2.dnn.blobFromImage(cannycolor, scalefactor=1.0, size=(W, H),
@@ -157,7 +165,7 @@ cv2.imshow("HED", hed)
 # cv2.imshow("Dilated", dilated)
 # cv2.imshow("HED on Canny", hedcanny)
 cv2.imshow("canny on HED", cannyhed)
-#cv2.imshow("Contours HED", contourhed)
+cv2.imshow("Contours HED", contourhed)
 # cv2.imshow("Contours HED on Canny", imgcontourhedoncanny)
 cv2.imshow("Contours Canny on HED", imgcontourcannyonhed)
 cv2.imshow("Contours Canny on HED approx", imgcontourcannyonhedapprox)
@@ -170,8 +178,8 @@ while True:
     key = cv2.waitKey(0)
     if key==27:    # Esc key to stop
         break
-    # cv2.drawContours(contourhed, contourshed, contour, (255,0,0), 1)
-    # cv2.imshow("Contours HED", contourhed)
+    cv2.drawContours(contourhed, contourshed, contour, (255,0,0), 1)
+    cv2.imshow("Contours HED", contourhed)
     # cv2.drawContours(imgcontourhedoncanny, contourshedoncanny,contour, (255,0,0), 1)
     # cv2.imshow("Contours HED on Canny", imgcontourhedoncanny)
     # cv2.drawContours(imgcontourcannyonhed, contourscannyonhed, contour, (255,0,0), 1)
