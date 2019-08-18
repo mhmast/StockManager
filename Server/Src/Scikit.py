@@ -84,7 +84,7 @@ def extractFeatures(img, asynch=False, multiChannel=False):
     for image in images:
         contours.append(processSingleImage(image, asynch))
     if len(contours) == 1:
-        return contours
+        return contours[0]
     otherContours = contours[1:]
     overlap = [c for c in contours[0] if inAtLeast(c, otherContours, len(otherContours)-1)]
     return overlap

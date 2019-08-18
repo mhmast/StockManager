@@ -34,20 +34,27 @@ def cannyChannel(img, channel):
     chan = getChannel(img, channel)
     return canny(chan)
 
+
 def cartoon(img):
     # 1) Edges
+
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    gray = cv2.medianBlur(gray, 5)
-    edges = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 9)
 
+    gray = cv2.medianBlur(gray, 21)
+    edges = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 35, 2)
+    edges = cv2.erode(edges, (5, 5), 5)
+    cv2.imshow("edges", edges)
     # 2) Color
+    img = cv2.medianBlur(img, 21)
     color = cv2.bilateralFilter(img, 9, 300, 300)
-
+    cv2.imshow("color", color)
     # 3) Cartoon
     return cv2.bitwise_and(color, color, mask=edges)
 
+
 def canny(img):
 
+    original = img
     sigma = 0.1
     if len(img.shape) == 3:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -58,9 +65,9 @@ def canny(img):
     upper = 10  # int(min(255, (1.0 + sigma) * v))
 
     chancanny = cv2.Canny(img, lower, upper)
-    img = np.zeros(img.shape, dtype="uint8")
-    img = np.bitwise_or(img, chancanny)
-    return (cv2.cvtColor(img, cv2.COLOR_GRAY2BGR), chancanny)
+    #img = np.zeros(img.shape, dtype="uint8")
+    img = np.bitwise_or(original, cv2.cvtColor(chancanny, cv2.COLOR_GRAY2BGR))
+    return (img, chancanny)
 
 
 def contourChannel(img, channel, color):
