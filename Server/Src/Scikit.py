@@ -1,5 +1,7 @@
-#__pool__ = None
-__showIntermediate__ = False
+# __pool__ = None
+__showIntermediate__ = True
+__drawContourBox__ = True
+__drawContours__ = False
 import uuid
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,7 +11,7 @@ import cv2
 import multiprocessing as mp
 from multiprocessing.pool import ThreadPool
 import time
-from ImageFunctions import getContours
+from ImageFunctions import getContours, cartoon
 from skimage import img_as_ubyte, img_as_int, img_as_float
 from ImageFunctions import getChannel
 from ContourExt import ContourExt
@@ -35,18 +37,20 @@ def displayContoursCV(image, contourexts):
     contours = [c.contours for c in contourexts]
     for r in contourexts:
         color = (255, 255, 255)
-        cv2.drawContours(image, [r.rect.getBoxPoints()], -1, color)
-        # while np.array_equal(color, (0, 0, 255)):
-        #     color = tuple(map(int, np.random.choice(range(256), size=3)))
-        cv2.drawContours(image, contours, contour, color)
-        contour += 1
+        global __drawContourBox__
+        if __drawContourBox__:
+            r.drawBox(image, color)
+        global __drawContours__
+        if __drawContours__:
+            r.drawContour(image, (100, 100, 100))
+            contour += 1
 
     cv2.imshow(str(uuid.uuid4()), image)
 
 
 def findContours(args):
 
-    return [ContourExt(np.array(np.flip(contour, 1)).astype(int)) for contour in find_contours(*args)]
+    return [ContourExt([np.array(np.flip(contour, 1)).astype(int)]) for contour in find_contours(*args)]
     # contours = find_contours(*args)
     # newContours = []
     # for contour in contours:
@@ -61,6 +65,7 @@ def findContours(args):
 
 def extractFeatures(img, asynch=False, multiChannel=False):
 
+    img = cartoon(img)
     imgColor = img
     images = [img]
 
@@ -88,6 +93,26 @@ def extractFeatures(img, asynch=False, multiChannel=False):
     otherContours = contours[1:]
     overlap = [c for c in contours[0] if inAtLeast(c, otherContours, len(otherContours)-1)]
     return overlap
+
+
+def cluster(contourExts):
+    origlen = len(contourExts)
+    itters = 0
+    for c in contourExts:
+        for c2 in contourExts:
+            if c != c2 and c.overlaps(c2):
+                contourExts.remove(c2)
+                contourExts.remove(c)
+                mergedContours = []
+                mergedContours.extend(c.contours)
+                mergedContours.extend(c2.contours)
+                contourExts.append(ContourExt(mergedContours))
+                break
+        itters += 1
+
+    return contourExts
+    # return set([ContourExt(list(zip(c.contours, c2.contours))[0])
+    #             if c != c2 and c.overlaps(c2) else c for c in contourExts for c2 in contourExts])
 
 
 def inAtLeast(c, itters, num):

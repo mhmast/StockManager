@@ -35,19 +35,21 @@ def cannyChannel(img, channel):
     return canny(chan)
 
 
-def cartoon(img):
-    # 1) Edges
+def cartoonEdges(img):
 
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    gray = cv2.medianBlur(gray, 21)
-    edges = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 35, 2)
-    edges = cv2.erode(edges, (5, 5), 5)
-    cv2.imshow("edges", edges)
+    gray = cv2.medianBlur(gray, 5)
+    edges = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+    return edges
+
+
+def cartoon(img):
+    # 1) Edges
+    edges = cartoonEdges(img)
     # 2) Color
-    img = cv2.medianBlur(img, 21)
+    img = cv2.medianBlur(img, 5)
     color = cv2.bilateralFilter(img, 9, 300, 300)
-    cv2.imshow("color", color)
     # 3) Cartoon
     return cv2.bitwise_and(color, color, mask=edges)
 
