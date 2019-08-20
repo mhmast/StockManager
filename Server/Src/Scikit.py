@@ -15,6 +15,7 @@ from ImageFunctions import getContours, cartoon
 from skimage import img_as_ubyte, img_as_int, img_as_float
 from ImageFunctions import getChannel
 from ContourExt import ContourExt
+from LinkedList import LinkedListElement
 
 
 def displayContoursSciKit(image, contours):
@@ -96,19 +97,26 @@ def extractFeatures(img, asynch=False, multiChannel=False):
 
 
 def cluster(contourExts):
-    origlen = len(contourExts)
-    itters = 0
-    for c in contourExts:
-        for c2 in contourExts:
+
+    llFirst = LinkedListElement(contourExts)
+    llcurrentOuter = llFirst
+    llcurrentInner = llFirst
+
+    while llcurrentOuter is not None:
+        c = llcurrentOuter.obj
+        while llcurrentInner is not None:
+            c2 = llcurrentInner.obj
             if c != c2 and c.overlaps(c2):
-                contourExts.remove(c2)
-                contourExts.remove(c)
+                llFirst = llFirst.remove(c2)
+                llcurrentInner = llcurrentInner.remove(c2)
                 mergedContours = []
                 mergedContours.extend(c.contours)
                 mergedContours.extend(c2.contours)
-                contourExts.append(ContourExt(mergedContours))
+                llFirst.append(ContourExt(mergedContours))
                 break
-        itters += 1
+            llcurrentInner = llcurrentInner.next()
+        llcurrentInner = llFirst
+        llcurrentOuter = llcurrentOuter.next()
 
     return contourExts
     # return set([ContourExt(list(zip(c.contours, c2.contours))[0])
