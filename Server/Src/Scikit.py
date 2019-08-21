@@ -1,9 +1,9 @@
 # __pool__ = None
-__showIntermediate__ = True
+__showIntermediate__ = False
 __drawContourBox__ = True
 __drawContours__ = False
 import uuid
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import numpy as np
 from skimage.measure import find_contours, approximate_polygon, \
     subdivide_polygon
@@ -15,7 +15,7 @@ from ImageFunctions import getContours, cartoon
 from skimage import img_as_ubyte, img_as_int, img_as_float
 from ImageFunctions import getChannel
 from ContourExt import ContourExt
-from LinkedList import LinkedListElement
+from LinkedList import LinkedListElement, LinkedListRegistry
 
 
 def displayContoursSciKit(image, contours):
@@ -50,8 +50,8 @@ def displayContoursCV(image, contourexts):
 
 
 def findContours(args):
-
-    return [ContourExt([np.array(np.flip(contour, 1)).astype(int)]) for contour in find_contours(*args)]
+    (image,level) = args
+    return [ContourExt([np.array(np.flip(contour, 1)).astype(int)]) for contour in find_contours(*args)] 
     # contours = find_contours(*args)
     # newContours = []
     # for contour in contours:
@@ -98,24 +98,28 @@ def extractFeatures(img, asynch=False, multiChannel=False):
 
 def cluster(contourExts):
 
-    llFirst = LinkedListElement(contourExts)
-    llcurrentOuter = llFirst
-    llcurrentInner = llFirst
+    registry = LinkedListRegistry()
+    for c in contourExts:
+        LinkedListElement(c,registry)
+
+    llcurrentOuter = registry.first
+    llcurrentInner = registry.first
 
     while llcurrentOuter is not None:
         c = llcurrentOuter.obj
+        newMerges = []
         while llcurrentInner is not None:
             c2 = llcurrentInner.obj
             if c != c2 and c.overlaps(c2):
-                llFirst = llFirst.remove(c2)
-                llcurrentInner = llcurrentInner.remove(c2)
+                llcurrentInner.remove(c2)
                 mergedContours = []
                 mergedContours.extend(c.contours)
                 mergedContours.extend(c2.contours)
-                llFirst.append(ContourExt(mergedContours))
-                break
+                newMerges.append(ContourExt(mergedContours))
             llcurrentInner = llcurrentInner.next()
-        llcurrentInner = llFirst
+        llcurrentInner = registry.first
+        for n in newMerges:
+             registry.last.append(n)
         llcurrentOuter = llcurrentOuter.next()
 
     return contourExts

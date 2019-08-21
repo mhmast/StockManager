@@ -11,6 +11,7 @@ def runCode():
     cap = cv2.VideoCapture(0)
     ret, image = cap.read()
     while(True):
+        cv2.imshow("original",image)
         # Capture frame-by-frame
         (h, w) = image.shape[:2]
         factor = max(w, h) / 500
@@ -21,14 +22,30 @@ def runCode():
         # extractFeatures(image, False, False)
         features = extractFeatures(image, False, True)
         beforeImg = image.copy()
-        for f in features:
-            f.drawBox(beforeImg, (0, 0, 255))
-            f.drawContour(beforeImg, (255, 0, 0))
-        cv2.imshow("beforeCluster", beforeImg)
-        features = cluster(features)
-        for f in features:
-            f.drawBox(image, (0, 0, 255))
-            f.drawContour(image, (255, 0, 0))
+        # for f in features:
+        #     f.drawBox(beforeImg, (0, 0, 255))
+        #     #f.drawContour(beforeImg, (255, 0, 0))
+        # cv2.imshow("beforeCluster", beforeImg)
+        
+        # features = cluster(features)
+
+        # for f in features:
+        #   f.drawBox(image, (0, 0, 255))
+    #       f.drawContour(beforeImg, (255, 0, 0))
+        
+        
+        imarea = w* h
+        counter = 0
+        fmap = [(f.rect.area(),f) for f in features]
+        fmap.sort(key=lambda f:f[0],reverse=True)
+        for f in fmap:
+            if counter >0:
+                break
+            counter += 1
+            f =f[1]
+            f.drawBox(image, (0,0, 255))
+            f.drawContour(image,(0,255,0))
+                
 
         image = cv2.resize(image, (w, h))
         cv2.imshow("afterCluster", image)
