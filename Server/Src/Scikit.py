@@ -89,10 +89,11 @@ def extractFeatures(img, asynch=False, multiChannel=False):
     else:
         for image in images:
             contours.append(processSingleImage(image, asynch))
+
     if len(contours) == 1:
         return contours[0]
     otherContours = contours[1:]
-    overlap = [c for c in contours[0] if inAtLeast(c, otherContours, len(otherContours)-1)]
+    overlap = [c for c in contours[0] if c.contourArea() > 0 and inAtLeast(c, otherContours, len(otherContours)-1)]
     return overlap
 
 
@@ -144,7 +145,7 @@ def processSingleImage_ansync(args):
 def processSingleImage(image, asynch):
     original = image
     min = 0
-    max = 10
+    max = 1
     if len(image.shape) == 3:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     image = img_as_float(image)

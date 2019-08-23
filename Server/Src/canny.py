@@ -11,11 +11,14 @@ def runCode():
 
     cap = cv2.VideoCapture(0)
     ret, image = cap.read()
+    drawContours = False
+    drawBox = False
+    drawCentroids = False
     while(True):
 
         # Capture frame-by-frame
         (h, w) = image.shape[:2]
-        factor = max(w, h) / 250
+        factor = max(w, h) / 500
         image = cv2.resize(image, (int(w/factor), int(h/factor)))
         image = cartoon(image)
         cv2.imshow("original", image)
@@ -39,26 +42,35 @@ def runCode():
         counter = 0
         fmap = [(f.rect.area(), f) for f in features]
         fmap.sort(key=lambda f: f[0], reverse=True)
-        contourimage = np.zeros(image.shape)
+        outputImage = np.zeros(image.shape)
         for f in fmap:
             if counter < 0:
                 break
             counter += 1
             f = f[1]
-            f.drawBox(contourimage, (0, 0, 255))
-           # f.drawContour(contourimage, (0, 255, 0))
+            if drawCentroids:
+                f.drawCentroid(outputImage, (255, 0, 0))
+            if drawBox:
+                f.drawBox(outputImage, (0, 0, 255))
+            if drawContours:
+                f.drawContour(outputImage, (0, 255, 0))
             # key = cv2.waitKey(0)
             # if key == 27:    # Esc key to stop
             #     break
+        cv2.imshow("output", outputImage)
 
-        cv2.imshow("contours", contourimage)
         # image = cv2.resize(image, (w, h))
         # cv2.imshow("afterCluster", image)
-        key = cv2.waitKey(50)
+        key = cv2.waitKey(1)
         if key == 27:    # Esc key to stop
             break
-        else:
-            ret, image = cap.read()
+        if key == ord('b'):
+            drawBox = not drawBox
+        if key == ord('c'):
+            drawCentroids = not drawCentroids
+        if key == ord('l'):
+            drawContours = not drawContours
+        ret, image = cap.read()
 
     # When everything done, release the capture
     cap.release()
