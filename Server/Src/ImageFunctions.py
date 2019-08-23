@@ -40,7 +40,7 @@ def cartoonEdges(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     gray = cv2.medianBlur(gray, 5)
-    edges = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+    edges = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 9, 2)
     return edges
 
 
@@ -84,15 +84,17 @@ def contourChannel(img, channel, color):
     return (imgcontours, chancontours)
 
 
-def getContours(image, color):
+def getContours(image, color=(0, 255, 0), draw=True):
 
     if len(image.shape) != 2:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     contours, hier = cv2.findContours(
         image,
         cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
     imgcontours = np.zeros(image.shape, dtype="uint8")
-    cv2.cvtColor(imgcontours, cv2.COLOR_GRAY2BGR)
-    cv2.drawContours(imgcontours, contours, -1, color, 1)
+    if draw:
+        cv2.cvtColor(imgcontours, cv2.COLOR_GRAY2BGR)
+        cv2.drawContours(imgcontours, contours, -1, color, 1)
 
     return (imgcontours, contours)

@@ -50,8 +50,8 @@ def displayContoursCV(image, contourexts):
 
 
 def findContours(args):
-    (image,level) = args
-    return [ContourExt([np.array(np.flip(contour, 1)).astype(int)]) for contour in find_contours(*args)] 
+    (image, level) = args
+    return [ContourExt([np.array(np.flip(contour, 1)).astype(int)]) for contour in find_contours(*args)]
     # contours = find_contours(*args)
     # newContours = []
     # for contour in contours:
@@ -77,18 +77,18 @@ def extractFeatures(img, asynch=False, multiChannel=False):
 
     result = []
     contours = []
-    # if asynch:
-    #     pool = mp.pool.ThreadPool(channels)
-    #     result = pool.map_async(processSingleImage_ansync, [(i, asynch) for i in images])
-    #     while not result.ready():
-    #         print('Running')
-    #         time.sleep(0.5)
-    #     result = result.get()
-    #     for r in result:
-    #         contours.append(r)
-    # else:
-    for image in images:
-        contours.append(processSingleImage(image, asynch))
+    if asynch:
+        pool = mp.Pool(channels)
+        result = pool.map_async(processSingleImage_ansync, [(i, asynch) for i in images])
+        while not result.ready():
+            print('Running')
+            time.sleep(0.5)
+        result = result.get()
+        for r in result:
+            contours.append(r)
+    else:
+        for image in images:
+            contours.append(processSingleImage(image, asynch))
     if len(contours) == 1:
         return contours[0]
     otherContours = contours[1:]
@@ -100,7 +100,7 @@ def cluster(contourExts):
 
     registry = LinkedListRegistry()
     for c in contourExts:
-        LinkedListElement(c,registry)
+        LinkedListElement(c, registry)
 
     llcurrentOuter = registry.first
     llcurrentInner = registry.first
@@ -119,7 +119,7 @@ def cluster(contourExts):
             llcurrentInner = llcurrentInner.next()
         llcurrentInner = registry.first
         for n in newMerges:
-             registry.last.append(n)
+            registry.last.append(n)
         llcurrentOuter = llcurrentOuter.next()
 
     return contourExts
@@ -151,18 +151,18 @@ def processSingleImage(image, asynch):
 
     contours = []
     result = None
-    if asynch:
-        pool = mp.Pool(max - min)
-        result = pool.map_async(findContours, [(image, no/10) for no in range(min, max)])
-        while not result.ready():
-            print('Running')
-            time.sleep(0.5)
-        result = result.get()
-        for r in result:
-            contours.extend(r)
-    else:
-        for i in range(min, max):
-            contours.extend(findContours((image, i/10)))
+    # if asynch:
+    #     pool = mp.Pool(max - min)
+    #     result = pool.map_async(findContours, [(image, no/10) for no in range(min, max)])
+    #     while not result.ready():
+    #         print('Running')
+    #         time.sleep(0.5)
+    #     result = result.get()
+    #     for r in result:
+    #         contours.extend(r)
+    # else:
+    for i in range(min, max):
+        contours.extend(findContours((image, i/10)))
     global __showIntermediate__
     if __showIntermediate__:
         displayContoursCV(original, contours)
